@@ -28,7 +28,7 @@ tab2 AS (
     INNER JOIN
         sessions AS s
         ON t.visitor_id = s.visitor_id AND t.last_date = s.visit_date
-    LEFT JOIN leads AS l ON s.visitor_id = l.visitor_id
+    LEFT JOIN leads AS l ON s.visitor_id = l.visitor_id AND t.last_date <= l.created_at
     GROUP BY 1, 2, 3, 4
 ),
 
