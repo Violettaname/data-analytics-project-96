@@ -98,6 +98,12 @@ where (case
 	end) is not null
 group by 1, 2;
 
+/* запрос для определения общего количества лидов */
 
+select
+	count(lead_id) as leads_count
+from leads;
+
+/* запрос для определения конверсии из клика в лид и из лида в оплату */
 
 
