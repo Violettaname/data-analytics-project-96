@@ -98,12 +98,88 @@ where (case
 	end) is not null
 group by 1, 2;
 
-/* запрос для определения общего количества лидов */
+/* запрос для определения общего количества уникальных лидов */
 
 select
-	count(lead_id) as leads_count
+	count(distinct lead_id) as leads_count
 from leads;
 
-/* запрос для определения конверсии из клика в лид и из лида в оплату */
+/* запрос для определения общего количества посещений, лидов и совершенных покупок по источникам переходов */
 
+select
+	(case
+		when source like ('vk%') then 'vk'
+		when source like ('yandex%') then 'yandex'
+		else 'other'
+	end) as source,
+	count(s.visitor_id) as count_visitors,
+	count(l.lead_id) as count_leads,
+	count(case
+		when l.status_id = 142 then l.lead_id 
+	end
+	) as count_purchases
+	from sessions as s
+	left join leads as l on s.visitor_id = l.visitor_id 
+where medium != 'organic'
+group by 1
+union all
+select 
+	(case
+		when medium = 'organic' then 'organic'
+	end) as source,
+	count(s.visitor_id) as count_visitors,
+	count(l.lead_id) as count_leads,
+	count(case
+		when l.status_id = 142 then l.lead_id 
+	end
+	) as count_purchases
+	from sessions as s
+	left join leads as l on s.visitor_id = l.visitor_id 
+where (case
+		when medium = 'organic' then 'organic'
+	end) is not null
+group by 1
 
+/* запрос для определения конверсии из клика в лид, из лида в оплату и из клика в оплату */
+
+with tab as (
+select
+	(case
+		when source like ('vk%') then 'vk'
+		when source like ('yandex%') then 'yandex'
+		else 'other'
+	end) as source,
+	count(s.visitor_id) as count_visitors,
+	count(l.lead_id) as count_leads,
+	count(case
+		when l.status_id = 142 then l.lead_id 
+	end
+	) as count_purchases
+	from sessions as s
+	left join leads as l on s.visitor_id = l.visitor_id 
+where medium != 'organic'
+group by 1
+union all
+select 
+	(case
+		when medium = 'organic' then 'organic'
+	end) as source,
+	count(s.visitor_id) as count_visitors,
+	count(l.lead_id) as count_leads,
+	count(case
+		when l.status_id = 142 then l.lead_id 
+	end
+	) as count_purchases
+	from sessions as s
+	left join leads as l on s.visitor_id = l.visitor_id 
+where (case
+		when medium = 'organic' then 'organic'
+	end) is not null
+group by 1
+)
+select
+	tab.source,
+	round(((tab.count_leads * 100.00) / tab.count_visitors), 2) as conv_visit_to_lead,
+	round(((tab.count_purchases * 100.00) / tab.count_leads), 2) as conv_lead_to_purchases,
+	round(((tab.count_purchases * 100.00) / tab.count_visitors), 2) conv_visit_to_purchases
+from tab
