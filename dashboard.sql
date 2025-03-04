@@ -183,3 +183,24 @@ select
 	round(((tab.count_purchases * 100.00) / tab.count_leads), 2) as conv_lead_to_purchases,
 	round(((tab.count_purchases * 100.00) / tab.count_visitors), 2) conv_visit_to_purchases
 from tab
+
+/* запрос для определения затрат по каналам: yandex и vk в динамике по дням */
+
+SELECT
+        DATE(campaign_date) AS campaign_date,
+        utm_source,
+        utm_medium,
+        utm_campaign,
+        SUM(daily_spent) AS total_cost
+    FROM vk_ads
+    GROUP BY 1, 2, 3, 4
+    UNION ALL
+    SELECT
+        DATE(campaign_date),
+        utm_source,
+        utm_medium,
+        utm_campaign,
+        SUM(daily_spent)
+    FROM ya_ads
+    GROUP BY 1, 2, 3, 4
+
