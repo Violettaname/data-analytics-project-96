@@ -13,7 +13,7 @@ tab2 AS (
         s.source AS utm_source,
         s.medium AS utm_medium,
         s.campaign AS utm_campaign,
-        COUNT(s.visitor_id) AS visitors_count,
+        COUNT(distinct t.visitor_id) AS visitors_count,
         COUNT(l.lead_id) AS leads_count,
         COUNT(
             CASE
