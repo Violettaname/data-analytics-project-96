@@ -1,206 +1,162 @@
-/* запрос для определения общего количества уникальных пользователей, которые посетили сайт */
+/* Расчеты метрик произведены на основе таблицы aggregate_last_paid_click, построенной по модели атрибуции Last Paid Click */
+/* Для более детального анализа в дашборде добавлены интерактивные фильтры по дате, источнику трафика, типу кампании и наименованию рекламной кампании, 
+поэтому запросы написаны для общего вывода данных */
+/* количество посетителей */
+SELECT 
+	sum(visitors_count) AS visitors
+FROM aggregate_last_paid_click;
 
-select
-	count(distinct visitor_id) as count_users
-from sessions;
+/* количество лидов */
+SELECT 
+	sum(leads_count) AS leads 
+FROM aggregate_last_paid_click;
 
-/* запрос для опреления общего количества посетителей сайта */
+/* количество покупателей */
+SELECT 
+	sum(purchases_count) AS purchases 
+FROM aggregate_last_paid_click;
 
-select
-	count(visitor_id) as count_visitor
-from sessions;
+/* конверсия из клика в лид */
+SELECT 
+	round(sum(leads_count) * 100.00 / sum(visitors_count), 2) AS conv_click_to_lead 
+FROM aggregate_last_paid_click;
 
-/*запрос для определения количества уникальных пользователей, которые заходили на сайт по дням */
+/* конверсия из лида в оплату */
+SELECT 
+	round(sum(purchases_count)*100.0/sum(leads_count), 2) AS conv_lead_to_purchase 
+FROM aggregate_last_paid_click;
 
-select
-	date(visit_date) as date,
-	count(distinct visitor_id) as count_users
-from sessions
-group by 1;
+/* окупаемость */
+SELECT 
+	round((SUM(revenue)-SUM(total_cost))*100.0/(SUM(total_cost)), 2) AS roi
+FROM aggregate_last_paid_click;
 
-/* запрос для определения каналов, которые приводят посетителей в разрезе дней */
+/* выручка */
+SELECT 
+	sum(revenue) AS revenue 
+FROM aggregate_last_paid_click;
 
-select 
-	date(date_trunc('day', visit_date)) as day,
-	(case
-		when source like ('vk%') then 'vk'
-		when source like ('yandex%') then 'yandex'
-		else 'other'
-	end) as sourse,
-	count(visitor_id) as count_visitors
-from sessions
-where medium != 'organic'
-group by 1, 2
-union all
-select
-	date(date_trunc('day', visit_date)) as day,
-	(case
-		when medium = 'organic' then 'organic'
-	end) as source,
-	count(visitor_id) as count_visitors
-from sessions
-where (case
-		when medium = 'organic' then 'organic'
-	end) is not null
-group by 1, 2
-order by 1;
+/* затраты */
+SELECT 
+	sum(total_cost) AS costs 
+FROM aggregate_last_paid_click;
 
-/* запрос для определения каналов, которые приводят посетителей по неделям */
-
-select 
-	date(date_trunc('week', visit_date)) as week,
-	(case
-		when source like ('vk%') then 'vk'
-		when source like ('yandex%') then 'yandex'
-		else 'other'
-	end) as sourse,
-	count(visitor_id) as count_visitors
-from sessions
-where medium != 'organic'
-group by 1, 2
-union all
-select
-	date(date_trunc('week', visit_date)) as week,
-	(case
-		when medium = 'organic' then 'organic'
-	end) as source,
-	count(visitor_id) as count_visitors
-from sessions
-where (case
-		when medium = 'organic' then 'organic'
-	end) is not null
-group by 1, 2
-order by 1;
-
-/* запрос для определения каналов, которые приводят посетителей за месяц */
-
-select 
-	date(date_trunc('month', visit_date)) as month,
-	(case
-		when source like ('vk%') then 'vk'
-		when source like ('yandex%') then 'yandex'
-		else 'other'
-	end) as sourse,
-	count(visitor_id) as count_visitors
-from sessions
-where medium != 'organic'
-group by 1, 2
-union all
-select
-	date(date_trunc('month', visit_date)) as month,
-	(case
-		when medium = 'organic' then 'organic'
-	end) as source,
-	count(visitor_id) as count_visitors
-from sessions
-where (case
-		when medium = 'organic' then 'organic'
-	end) is not null
-group by 1, 2;
-
-/* запрос для определения общего количества уникальных лидов */
-
-select
-	count(distinct lead_id) as leads_count
-from leads;
-
-/* запрос для определения общего количества посещений, лидов и совершенных покупок по источникам переходов */
-
-select
-	(case
-		when source like ('vk%') then 'vk'
-		when source like ('yandex%') then 'yandex'
-		else 'other'
-	end) as source,
-	count(s.visitor_id) as count_visitors,
-	count(l.lead_id) as count_leads,
-	count(case
-		when l.status_id = 142 then l.lead_id 
-	end
-	) as count_purchases
-	from sessions as s
-	left join leads as l on s.visitor_id = l.visitor_id 
-where medium != 'organic'
-group by 1
-union all
-select 
-	(case
-		when medium = 'organic' then 'organic'
-	end) as source,
-	count(s.visitor_id) as count_visitors,
-	count(l.lead_id) as count_leads,
-	count(case
-		when l.status_id = 142 then l.lead_id 
-	end
-	) as count_purchases
-	from sessions as s
-	left join leads as l on s.visitor_id = l.visitor_id 
-where (case
-		when medium = 'organic' then 'organic'
-	end) is not null
-group by 1
-
-/* запрос для определения конверсии из клика в лид, из лида в оплату и из клика в оплату */
-
-with tab as (
-select
-	(case
-		when source like ('vk%') then 'vk'
-		when source like ('yandex%') then 'yandex'
-		else 'other'
-	end) as source,
-	count(s.visitor_id) as count_visitors,
-	count(l.lead_id) as count_leads,
-	count(case
-		when l.status_id = 142 then l.lead_id 
-	end
-	) as count_purchases
-	from sessions as s
-	left join leads as l on s.visitor_id = l.visitor_id 
-where medium != 'organic'
-group by 1
-union all
-select 
-	(case
-		when medium = 'organic' then 'organic'
-	end) as source,
-	count(s.visitor_id) as count_visitors,
-	count(l.lead_id) as count_leads,
-	count(case
-		when l.status_id = 142 then l.lead_id 
-	end
-	) as count_purchases
-	from sessions as s
-	left join leads as l on s.visitor_id = l.visitor_id 
-where (case
-		when medium = 'organic' then 'organic'
-	end) is not null
-group by 1
-)
-select
-	tab.source,
-	round(((tab.count_leads * 100.00) / tab.count_visitors), 2) as conv_visit_to_lead,
-	round(((tab.count_purchases * 100.00) / tab.count_leads), 2) as conv_lead_to_purchases,
-	round(((tab.count_purchases * 100.00) / tab.count_visitors), 2) conv_visit_to_purchases
-from tab
-
-/* запрос для определения затрат по каналам: yandex и vk в динамике по дням */
-
+/* динамика посещений */
 SELECT
-        DATE(campaign_date) AS campaign_date,
-        utm_source,
-        utm_medium,
-        utm_campaign,
-        SUM(daily_spent) AS total_cost
-    FROM vk_ads
-    GROUP BY 1, 2, 3, 4
-    UNION ALL
-    SELECT
-        DATE(campaign_date),
-        utm_source,
-        utm_medium,
-        utm_campaign,
-        SUM(daily_spent)
-    FROM ya_ads
-    GROUP BY 1, 2, 3, 4
+    visit_date,
+    CASE
+        WHEN utm_source LIKE ('vk%') THEN 'vk'
+        WHEN utm_source LIKE lower('yandex%') THEN 'yandex'
+        ELSE 'other'
+    END AS utm_source,
+    sum(visitors_count) AS visitors
+FROM aggregate_last_paid_click
+GROUP BY
+    visit_date, CASE
+        WHEN utm_source LIKE ('vk%') THEN 'vk'
+        WHEN utm_source LIKE lower('yandex%') THEN 'yandex'
+        ELSE 'other'
+    END
+ORDER BY visitors DESC
+
+/* источники трафика: распределение трафика по каналам */
+SELECT
+    CASE
+        WHEN utm_source LIKE ('vk%') THEN 'vk'
+        WHEN utm_source LIKE lower('yandex%') THEN 'yandex'
+        ELSE 'other'
+    END AS source,
+    sum(visitors_count) AS visitors
+FROM aggregate_last_paid_click
+GROUP BY
+    CASE
+        WHEN utm_source LIKE ('vk%') THEN 'vk'
+        WHEN utm_source LIKE lower('yandex%') THEN 'yandex'
+        ELSE 'other'
+    END
+ORDER BY visitors DESC
+
+/* количество лидов по каналам */
+SELECT
+    CASE
+        WHEN utm_source LIKE ('vk%') THEN 'vk'
+        WHEN utm_source LIKE lower('yandex%') THEN 'yandex'
+        ELSE 'other'
+    END AS source,
+    sum(leads_count) AS leads
+FROM aggregate_last_paid_click
+GROUP BY
+    CASE
+        WHEN utm_source LIKE ('vk%') THEN 'vk'
+        WHEN utm_source LIKE lower('yandex%') THEN 'yandex'
+        ELSE 'other'
+    END
+ORDER BY leads DESC
+
+/* количество посетителей, лидов, покупателей по каналам (воронка: клик --> лид --> оплата) */
+SELECT
+    CASE
+        WHEN utm_source LIKE ('vk%') THEN 'vk'
+        WHEN utm_source LIKE lower('yandex%') THEN 'yandex'
+        ELSE 'other'
+    END AS source,
+    sum(visitors_count) AS visitors,
+    sum(leads_count) AS leads,
+    sum(purchases_count) AS purchases
+FROM aggregate_last_paid_click
+GROUP BY
+    CASE
+        WHEN utm_source LIKE ('vk%') THEN 'vk'
+        WHEN utm_source LIKE lower('yandex%') THEN 'yandex'
+        ELSE 'other'
+    END
+ORDER BY visitors DESC
+
+/* Конверсии по каналам, % */
+SELECT
+    CASE
+        WHEN utm_source LIKE ('vk%') THEN 'vk'
+        WHEN utm_source LIKE lower('yandex%') THEN 'yandex'
+        ELSE 'other'
+    END AS sourse,
+    round(sum(leads_count) * 100.00 / sum(visitors_count), 2) AS conv_click_to_lead,
+    round(sum(purchases_count) * 100.0 / sum(leads_count), 2) AS conv_lead_to_purchase
+FROM aggregate_last_paid_click
+GROUP BY
+    CASE
+        WHEN utm_source LIKE ('vk%') THEN 'vk'
+        WHEN utm_source LIKE lower('yandex%') THEN 'yandex'
+        ELSE 'other'
+    END
+ORDER BY conv_click_to_lead DESC
+
+/* Затраты на рекламу */
+SELECT
+    visit_date,
+    utm_source,
+    sum(total_cost) AS costs
+FROM aggregate_last_paid_click
+WHERE utm_source IN ('vk', 'yandex')
+GROUP BY visit_date, utm_source
+ORDER BY costs DESC
+
+/* окупаемость рекламных кампаний*/
+SELECT
+    utm_campaign,
+    utm_source,
+    ROUND((SUM(revenue) - SUM(total_cost)) * 100.0 / (SUM(total_cost)), 2) AS source
+FROM aggregate_last_paid_click
+WHERE utm_source IN ('yandex', 'vk')
+GROUP BY utm_campaign, utm_source
+ORDER BY source DESC NULLS LAST
+
+/* динамика окупаемости */
+SELECT
+    visit_date,
+    ROUND((SUM(revenue) - SUM(total_cost)) * 100.0 / (SUM(total_cost)), 2) AS roi
+FROM aggregate_last_paid_click
+GROUP BY visit_date
+
+/* итоговая таблица */
+
 
