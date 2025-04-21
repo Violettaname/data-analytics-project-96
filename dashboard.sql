@@ -40,6 +40,21 @@ SELECT
 	sum(total_cost) AS costs 
 FROM aggregate_last_paid_click;
 
+/* CPU */
+
+SELECT round(sum(total_cost) / sum(visitors_count), 2) AS cpu 
+FROM aggregate_last_paid_click
+
+/* CPL */
+
+SELECT round(sum(total_cost) / sum(leads_count), 2) AS cpu 
+FROM aggregate_last_paid_click
+
+/* CPPU */
+
+SELECT round(sum(total_cost) / sum(purchases_count), 2) AS cpu 
+FROM aggregate_last_paid_click
+
 /* динамика посещений */
 SELECT
     visit_date,
