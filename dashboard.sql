@@ -219,4 +219,18 @@ FROM aggregate_last_paid_click
 GROUP BY utm_campaign
 ORDER BY roi DESC NULLS LAST
 
+/* запрос для определения количества дней с момента перехода по рекламе */
+
+with tab as(
+	 SELECT
+        visitor_id,
+        MAX(visit_date) AS last_date
+    FROM sessions
+    WHERE medium != 'organic'
+    GROUP BY 1
+)
+select 
+	avg(date(l.created_at ) - date(t.last_date)) AS avg_days_to_close
+from tab t
+left join leads l on t.visitor_id = l.visitor_id and t.last_date <= l.created_at
 
