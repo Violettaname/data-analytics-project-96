@@ -54,10 +54,10 @@ ads AS (
 
 SELECT
     t2.visit_date,
+    t2.visitors_count,
     t2.utm_source,
     t2.utm_medium,
     t2.utm_campaign,
-    t2.visitors_count,
     a.total_cost,
     t2.leads_count,
     t2.purchases_count,
