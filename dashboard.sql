@@ -1,4 +1,78 @@
 /* Расчеты метрик произведены на основе таблицы aggregate_last_paid_click, построенной по модели атрибуции Last Paid Click */
+WITH tab AS (
+    SELECT
+        visitor_id,
+        MAX(visit_date) AS last_date
+    FROM sessions
+    WHERE medium != 'organic'
+    GROUP BY 1
+),
+tab2 AS (
+    SELECT
+        DATE(t.last_date) AS visit_date,
+        s.source AS utm_source,
+        s.medium AS utm_medium,
+        s.campaign AS utm_campaign,
+        COUNT(DISTINCT t.visitor_id) AS visitors_count,
+        COUNT(l.lead_id) AS leads_count,
+        COUNT(
+            CASE
+                WHEN
+                    l.status_id = 142
+                    OR l.closing_reason = 'Успешно реализовано'
+                    THEN l.visitor_id
+            END
+        ) AS purchases_count,
+        SUM(l.amount) AS revenue
+    FROM tab AS t
+    INNER JOIN
+        sessions AS s
+        ON t.visitor_id = s.visitor_id AND t.last_date = s.visit_date
+    LEFT JOIN
+        leads AS l
+        ON s.visitor_id = l.visitor_id AND t.last_date <= l.created_at
+    GROUP BY 1, 2, 3, 4
+),
+ads AS (
+    SELECT
+        DATE(campaign_date) AS campaign_date,
+        utm_source,
+        utm_medium,
+        utm_campaign,
+        SUM(daily_spent) AS total_cost
+    FROM vk_ads
+    GROUP BY 1, 2, 3, 4
+    UNION ALL
+    SELECT
+        DATE(campaign_date),
+        utm_source,
+        utm_medium,
+        utm_campaign,
+        SUM(daily_spent)
+    FROM ya_ads
+    GROUP BY 1, 2, 3, 4
+),
+aggregate_last_paid_click as (
+SELECT
+    t2.visit_date,
+    t2.visitors_count,
+    t2.utm_source,
+    t2.utm_medium,
+    t2.utm_campaign,
+    a.total_cost,
+    t2.leads_count,
+    t2.purchases_count,
+    t2.revenue
+FROM tab2 AS t2
+LEFT JOIN ads AS a
+    ON
+        t2.visit_date = a.campaign_date
+        AND t2.utm_source = a.utm_source
+        AND t2.utm_medium = a.utm_medium
+        AND t2.utm_campaign = a.utm_campaign
+ORDER BY 9 DESC NULLS LAST, 1 ASC, 5 DESC, 2, 3, 4
+)
+	
 /* Для более детального анализа в дашборде добавлены интерактивные фильтры по дате, источнику трафика, типу кампании и наименованию рекламной кампании */
 /* количество посетителей */
 SELECT 
@@ -15,45 +89,21 @@ SELECT
 	sum(purchases_count) AS purchases 
 FROM aggregate_last_paid_click;
 
-/* конверсия из клика в лид */
+/* конверсия из клика в лид, из лида в оплату */
 SELECT 
-	round(sum(leads_count) * 100.00 / sum(visitors_count), 2) AS conv_click_to_lead 
+	round(sum(leads_count) * 100.00 / sum(visitors_count), 2) AS conv_click_to_lead,
+	round(sum(purchases_count)*100.0/sum(leads_count), 2) AS conv_lead_to_purchase
 FROM aggregate_last_paid_click;
 
-/* конверсия из лида в оплату */
+/* выручка, затраты, CPU, CPL, CPPU, ROI */
 SELECT 
-	round(sum(purchases_count)*100.0/sum(leads_count), 2) AS conv_lead_to_purchase 
+	sum(revenue) AS revenue,
+	sum(total_cost) AS costs,
+	round(sum(total_cost) / sum(visitors_count), 2) AS cpu,
+	round(sum(total_cost) / sum(leads_count), 2) AS cpl,
+	round(sum(total_cost) / sum(purchases_count), 2) AS cppu
+	round((SUM(revenue)-SUM(total_cost))*100.0/(SUM(total_cost)), 2) AS roi,
 FROM aggregate_last_paid_click;
-
-/* окупаемость */
-SELECT 
-	round((SUM(revenue)-SUM(total_cost))*100.0/(SUM(total_cost)), 2) AS roi
-FROM aggregate_last_paid_click;
-
-/* выручка */
-SELECT 
-	sum(revenue) AS revenue 
-FROM aggregate_last_paid_click;
-
-/* затраты */
-SELECT 
-	sum(total_cost) AS costs 
-FROM aggregate_last_paid_click;
-
-/* CPU */
-
-SELECT round(sum(total_cost) / sum(visitors_count), 2) AS cpu 
-FROM aggregate_last_paid_click
-
-/* CPL */
-
-SELECT round(sum(total_cost) / sum(leads_count), 2) AS cpu 
-FROM aggregate_last_paid_click
-
-/* CPPU */
-
-SELECT round(sum(total_cost) / sum(purchases_count), 2) AS cpu 
-FROM aggregate_last_paid_click
 
 /* динамика посещений */
 SELECT
