@@ -251,20 +251,5 @@ SELECT
     round((sum(revenue) - sum(total_cost)) * 100.00 / sum(total_cost), 2) AS roi
 FROM aggregate_last_paid_click
 GROUP BY utm_medium
-ORDER BY roi DESC NULLS LAST
+ORDER BY roi DESC NULLS LAST;
 
-/* итоговая таблица по агрегации campaign */
-SELECT
-    utm_campaign AS campaign,
-    sum(visitors_count) AS visitors,
-    sum(leads_count) AS leads,
-    sum(purchases_count) AS purchases,
-    sum(total_cost) AS cost,
-    sum(revenue) AS revenue,
-    round(sum(total_cost) / sum(visitors_count), 2) AS cpu,
-    round(sum(total_cost) / sum(leads_count), 2) AS cpl,
-    round(sum(total_cost) / sum(purchases_count), 2) AS cppu,
-    round((sum(revenue) - sum(total_cost)) * 100.00 / sum(total_cost), 2) AS roi
-FROM aggregate_last_paid_click
-GROUP BY utm_campaign
-ORDER BY roi DESC NULLS LAST
