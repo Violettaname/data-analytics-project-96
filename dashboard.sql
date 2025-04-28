@@ -74,19 +74,11 @@ ORDER BY 9 DESC NULLS LAST, 1 ASC, 5 DESC, 2, 3, 4
 )
 	
 /* Для более детального анализа в дашборде добавлены интерактивные фильтры по дате, источнику трафика, типу кампании и наименованию рекламной кампании */
-/* количество посетителей */
+/* количество посетителей, лидов, покупателей */
 SELECT 
-	sum(visitors_count) AS visitors
-FROM aggregate_last_paid_click;
-
-/* количество лидов */
-SELECT 
-	sum(leads_count) AS leads 
-FROM aggregate_last_paid_click;
-
-/* количество покупателей */
-SELECT 
-	sum(purchases_count) AS purchases 
+	sum(visitors_count) AS visitors,
+	sum(leads_count) AS leads,
+	sum(purchases_count) AS purchases
 FROM aggregate_last_paid_click;
 
 /* конверсия из клика в лид, из лида в оплату */
