@@ -186,15 +186,18 @@ GROUP BY
     END
 ORDER BY conv_click_to_lead DESC
 
-/* Затраты на рекламу */
-SELECT
-    visit_date,
-    utm_source,
-    sum(total_cost) AS costs
-FROM aggregate_last_paid_click
-WHERE utm_source IN ('vk', 'yandex')
-GROUP BY visit_date, utm_source
-ORDER BY costs DESC
+/* общие затраты на рекламу */
+select
+    ya.utm_source,
+    sum(ya.daily_spent) as costs
+from ya_ads as ya
+group by 1
+union all
+select
+    va.utm_source,
+    sum(va.daily_spent) as costs
+from vk_ads as va
+group by 1;
 
 /* окупаемость рекламных кампаний*/
 SELECT
