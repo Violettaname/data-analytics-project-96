@@ -248,3 +248,36 @@ FROM aggregate_last_paid_click
 GROUP BY utm_medium
 ORDER BY roi DESC NULLS LAST;
 
+/* время закрытия лидов */
+WITH tab AS (
+    SELECT
+        visitor_id,
+        MAX(visit_date) AS visit_date
+    FROM sessions
+    WHERE medium != 'organic'
+    GROUP BY 1
+),
+tab2 AS (
+    SELECT
+        l.lead_id,
+        DATE(t.visit_date) AS click_date,
+        DATE(l.created_at) AS conversion_date
+    FROM tab AS t
+    INNER JOIN
+        leads AS l
+        ON t.visitor_id = l.visitor_id AND t.visit_date <= l.created_at
+),
+tab3 AS (
+    SELECT
+        (conversion_date - click_date) AS days_to_close,
+        COUNT(lead_id)
+    FROM tab2
+    GROUP BY 1
+    ORDER BY 1
+)
+SELECT PERCENTILE_DISC(0.9) WITHIN GROUP (
+    ORDER BY days_to_close
+) FROM tab3
+
+
+
