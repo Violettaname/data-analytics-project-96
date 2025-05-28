@@ -17,10 +17,8 @@ tab2 AS (
         COUNT(l.lead_id) AS leads_count,
         COUNT(
             CASE
-                WHEN
-                    l.status_id = 142
-                    OR l.closing_reason = 'Успешно реализовано'
-                    THEN l.visitor_id
+                WHEN l.status_id = 142 OR l.closing_reason = 'Успешно реализовано'
+                THEN l.visitor_id
             END
         ) AS purchases_count,
         SUM(l.amount) AS revenue
@@ -30,7 +28,7 @@ tab2 AS (
                         AND t.last_date = s.visit_date
     LEFT JOIN leads AS l ON s.visitor_id = l.visitor_id 
                         AND t.last_date <= l.created_at
-    GROUP BY 1, 2, 3, 4
+    GROUP BY DATE(t.last_date), s.source, s.medium, s.campaign
 ),
 
 ads AS (
