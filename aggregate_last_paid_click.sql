@@ -34,7 +34,7 @@ tab2 AS (
         ON
             s.visitor_id = l.visitor_id
             AND t.last_date <= l.created_at
-    GROUP BY DATE(t.last_date), s.source, s.medium, s.campaign
+    GROUP BY 1, 2, 3, 4
 ),
 
 ads AS (
@@ -75,4 +75,3 @@ LEFT JOIN ads AS a
         AND t2.utm_medium = a.utm_medium
         AND t2.utm_campaign = a.utm_campaign
 ORDER BY 9 DESC NULLS LAST, 1 ASC, 5 DESC, 2, 3, 4;
-
