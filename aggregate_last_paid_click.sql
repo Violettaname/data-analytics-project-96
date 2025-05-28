@@ -9,25 +9,31 @@ WITH tab AS (
 
 tab2 AS (
     SELECT
-        DATE(t.last_date) AS visit_date,
         s.source AS utm_source,
         s.medium AS utm_medium,
         s.campaign AS utm_campaign,
+        DATE(t.last_date) AS visit_date,
         COUNT(DISTINCT t.visitor_id) AS visitors_count,
         COUNT(l.lead_id) AS leads_count,
         COUNT(
             CASE
-                WHEN l.status_id = 142 OR l.closing_reason = 'Успешно реализовано'
-                THEN l.visitor_id
+                WHEN
+                    l.status_id = 142
+                    OR l.closing_reason = 'Успешно реализовано'
+                    THEN l.visitor_id
             END
         ) AS purchases_count,
         SUM(l.amount) AS revenue
     FROM tab AS t
     INNER JOIN
-        sessions AS s ON t.visitor_id = s.visitor_id 
-                        AND t.last_date = s.visit_date
-    LEFT JOIN leads AS l ON s.visitor_id = l.visitor_id 
-                        AND t.last_date <= l.created_at
+        sessions AS s
+        ON
+            t.visitor_id = s.visitor_id
+            AND t.last_date = s.visit_date
+    LEFT JOIN leads AS l
+        ON
+            s.visitor_id = l.visitor_id
+            AND t.last_date <= l.created_at
     GROUP BY DATE(t.last_date), s.source, s.medium, s.campaign
 ),
 
@@ -69,3 +75,4 @@ LEFT JOIN ads AS a
         AND t2.utm_medium = a.utm_medium
         AND t2.utm_campaign = a.utm_campaign
 ORDER BY 9 DESC NULLS LAST, 1 ASC, 5 DESC, 2, 3, 4;
+
