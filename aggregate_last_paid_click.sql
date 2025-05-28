@@ -6,14 +6,13 @@ WITH tab AS (
     WHERE medium != 'organic'
     GROUP BY 1
 ),
-
 tab2 AS (
     SELECT
         DATE(t.last_date) AS visit_date,
         s.source AS utm_source,
         s.medium AS utm_medium,
         s.campaign AS utm_campaign,
-        COUNT(distinct t.visitor_id) AS visitors_count,
+        COUNT(DISTINCT t.visitor_id) AS visitors_count,
         COUNT(l.lead_id) AS leads_count,
         COUNT(
             CASE
@@ -28,10 +27,10 @@ tab2 AS (
     INNER JOIN
         sessions AS s
         ON t.visitor_id = s.visitor_id AND t.last_date = s.visit_date
-    LEFT JOIN leads AS l ON s.visitor_id = l.visitor_id AND t.last_date <= l.created_at
+    LEFT JOIN leads AS l ON s.visitor_id = l.visitor_id 
+                        AND t.last_date <= l.created_at
     GROUP BY 1, 2, 3, 4
 ),
-
 ads AS (
     SELECT
         DATE(campaign_date) AS campaign_date,
@@ -43,15 +42,14 @@ ads AS (
     GROUP BY 1, 2, 3, 4
     UNION ALL
     SELECT
-        DATE(campaign_date),
+        DATE(campaign_date) AS campaign_date,
         utm_source,
         utm_medium,
         utm_campaign,
-        SUM(daily_spent)
+        SUM(daily_spent) AS total_cost
     FROM ya_ads
     GROUP BY 1, 2, 3, 4
 )
-
 SELECT
     t2.visit_date,
     t2.visitors_count,
