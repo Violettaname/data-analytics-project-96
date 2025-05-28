@@ -7,12 +7,13 @@ WITH tab AS (
     WHERE medium != 'organic'
     GROUP BY 1
 ),
+
 tab2 AS (
     SELECT
-        DATE(t.last_date) AS visit_date,
         s.source AS utm_source,
         s.medium AS utm_medium,
         s.campaign AS utm_campaign,
+        DATE(t.last_date) AS visit_date,
         COUNT(DISTINCT t.visitor_id) AS visitors_count,
         COUNT(l.lead_id) AS leads_count,
         COUNT(
@@ -27,12 +28,16 @@ tab2 AS (
     FROM tab AS t
     INNER JOIN
         sessions AS s
-        ON t.visitor_id = s.visitor_id AND t.last_date = s.visit_date
-    LEFT JOIN
-        leads AS l
-        ON s.visitor_id = l.visitor_id AND t.last_date <= l.created_at
+        ON
+            t.visitor_id = s.visitor_id
+            AND t.last_date = s.visit_date
+    LEFT JOIN leads AS l
+        ON
+            s.visitor_id = l.visitor_id
+            AND t.last_date <= l.created_at
     GROUP BY 1, 2, 3, 4
 ),
+
 ads AS (
     SELECT
         DATE(campaign_date) AS campaign_date,
@@ -44,15 +49,16 @@ ads AS (
     GROUP BY 1, 2, 3, 4
     UNION ALL
     SELECT
-        DATE(campaign_date),
+        DATE(campaign_date) AS campaign_date,
         utm_source,
         utm_medium,
         utm_campaign,
-        SUM(daily_spent)
+        SUM(daily_spent) AS total_cost
     FROM ya_ads
     GROUP BY 1, 2, 3, 4
 ),
-aggregate_last_paid_click as (
+
+aggregate_last_paid_click as (	
 SELECT
     t2.visit_date,
     t2.visitors_count,
@@ -73,18 +79,21 @@ LEFT JOIN ads AS a
 ORDER BY 9 DESC NULLS LAST, 1 ASC, 5 DESC, 2, 3, 4
 )
 	
-/* Для более детального анализа в дашборде добавлены интерактивные фильтры по дате, источнику трафика, типу кампании и наименованию рекламной кампании */
 /* количество посетителей, лидов, покупателей */
-SELECT 
-	sum(visitors_count) AS visitors,
-	sum(leads_count) AS leads,
-	sum(purchases_count) AS purchases
+SELECT
+    sum(visitors_count) AS visitors,
+    sum(leads_count) AS leads,
+    sum(purchases_count) AS purchases
 FROM aggregate_last_paid_click;
 
 /* конверсия из клика в лид, из лида в оплату */
-SELECT 
-	round(sum(leads_count) * 100.00 / sum(visitors_count), 2) AS conv_click_to_lead,
-	round(sum(purchases_count)*100.0/sum(leads_count), 2) AS conv_lead_to_purchase
+SELECT
+    round(
+        sum(leads_count) * 100.00 / sum(visitors_count), 2
+    ) AS conv_click_to_lead,
+    round(
+        sum(purchases_count) * 100.0 / sum(leads_count), 2
+    ) AS conv_lead_to_purchase
 FROM aggregate_last_paid_click;
 
 /* выручка, затраты, CPU, CPL, CPPU, ROI */
@@ -175,8 +184,12 @@ SELECT
         WHEN utm_source LIKE lower('yandex%') THEN 'yandex'
         ELSE 'other'
     END AS sourse,
-    round(sum(leads_count) * 100.00 / sum(visitors_count), 2) AS conv_click_to_lead,
-    round(sum(purchases_count) * 100.0 / sum(leads_count), 2) AS conv_lead_to_purchase
+    round(
+        sum(leads_count) * 100.00 / sum(visitors_count), 2
+    ) AS conv_click_to_lead,
+    round(
+        sum(purchases_count) * 100.0 / sum(leads_count), 2
+    ) AS conv_lead_to_purchase
 FROM aggregate_last_paid_click
 GROUP BY
     CASE
@@ -203,18 +216,13 @@ group by 1;
 SELECT
     utm_campaign,
     utm_source,
-    ROUND((SUM(revenue) - SUM(total_cost)) * 100.0 / (SUM(total_cost)), 2) AS source
+    ROUND(
+        (SUM(revenue) - SUM(total_cost)) * 100.0 / (SUM(total_cost)), 2
+    ) AS source
 FROM aggregate_last_paid_click
 WHERE utm_source IN ('yandex', 'vk')
 GROUP BY utm_campaign, utm_source
 ORDER BY source DESC NULLS LAST
-
-/* динамика окупаемости */
-SELECT
-    visit_date,
-    ROUND((SUM(revenue) - SUM(total_cost)) * 100.0 / (SUM(total_cost)), 2) AS roi
-FROM aggregate_last_paid_click
-GROUP BY visit_date
 
 /* итоговая таблица по агрегации source */
 SELECT
@@ -257,6 +265,7 @@ WITH tab AS (
     WHERE medium != 'organic'
     GROUP BY 1
 ),
+
 tab2 AS (
     SELECT
         l.lead_id,
@@ -267,6 +276,7 @@ tab2 AS (
         leads AS l
         ON t.visitor_id = l.visitor_id AND t.visit_date <= l.created_at
 ),
+
 tab3 AS (
     SELECT
         (conversion_date - click_date) AS days_to_close,
@@ -275,9 +285,7 @@ tab3 AS (
     GROUP BY 1
     ORDER BY 1
 )
+
 SELECT PERCENTILE_DISC(0.9) WITHIN GROUP (
     ORDER BY days_to_close
-) FROM tab3
-
-
-
+) FROM tab3;
