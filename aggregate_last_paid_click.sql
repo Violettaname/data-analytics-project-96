@@ -6,6 +6,7 @@ WITH tab AS (
     WHERE medium != 'organic'
     GROUP BY 1
 ),
+
 tab2 AS (
     SELECT
         DATE(t.last_date) AS visit_date,
@@ -25,12 +26,13 @@ tab2 AS (
         SUM(l.amount) AS revenue
     FROM tab AS t
     INNER JOIN
-        sessions AS s
-        ON t.visitor_id = s.visitor_id AND t.last_date = s.visit_date
+        sessions AS s ON t.visitor_id = s.visitor_id 
+                        AND t.last_date = s.visit_date
     LEFT JOIN leads AS l ON s.visitor_id = l.visitor_id 
                         AND t.last_date <= l.created_at
     GROUP BY 1, 2, 3, 4
 ),
+
 ads AS (
     SELECT
         DATE(campaign_date) AS campaign_date,
@@ -50,6 +52,7 @@ ads AS (
     FROM ya_ads
     GROUP BY 1, 2, 3, 4
 )
+
 SELECT
     t2.visit_date,
     t2.visitors_count,
