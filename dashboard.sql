@@ -72,7 +72,7 @@ aggregate_last_paid_click AS (
         t2.revenue
     FROM tab2 AS t2
     LEFT JOIN ads AS a
-        ON 
+        ON
             t2.visit_date = a.campaign_date
             AND t2.utm_source = a.utm_source
             AND t2.utm_medium = a.utm_medium
@@ -82,43 +82,43 @@ aggregate_last_paid_click AS (
 
 /* количество посетителей, лидов, покупателей */
 SELECT
-    sum(visitors_count) AS visitors,
-    sum(leads_count) AS leads,
-    sum(purchases_count) AS purchases
+    SUM(visitors_count) AS visitors,
+    SUM(leads_count) AS leads,
+    SUM(purchases_count) AS purchases
 FROM aggregate_last_paid_click;
 
 /* конверсия из клика в лид, из лида в оплату */
 SELECT
-    round(
-        sum(leads_count) * 100.00 / sum(visitors_count), 2
+    ROUND(
+        SUM(leads_count) * 100.00 / SUM(visitors_count), 2
     ) AS conv_click_to_lead,
-    round(
-        sum(purchases_count) * 100.0 / sum(leads_count), 2
+    ROUND(
+        SUM(purchases_count) * 100.0 / SUM(leads_count), 2
     ) AS conv_lead_to_purchase
 FROM aggregate_last_paid_click;
 /* выручка, затраты, CPU, CPL, CPPU, ROI */
 SELECT 
-	sum(revenue) AS revenue,
-	sum(total_cost) AS costs,
-	round(sum(total_cost) / sum(visitors_count), 2) AS cpu,
-	round(sum(total_cost) / sum(leads_count), 2) AS cpl,
-	round(sum(total_cost) / sum(purchases_count), 2) AS cppu
-	round((SUM(revenue)-SUM(total_cost))*100.0/(SUM(total_cost)), 2) AS roi,
+	SUM(revenue) AS revenue,
+	SUM(total_cost) AS costs,
+	ROUND(SUM(total_cost) / SUM(visitors_count), 2) AS cpu,
+	ROUND(SUM(total_cost) / SUM(leads_count), 2) AS cpl,
+	ROUND(SUM(total_cost) / SOM(purchases_count), 2) AS cppu,
+	ROUND((SUM(revenue)-SUM(total_cost))*100.0/(SUM(total_cost)), 2) AS roi
 FROM aggregate_last_paid_click;
 /* динамика посещений */
 SELECT
     visit_date,
     CASE
         WHEN utm_source LIKE ('vk%') THEN 'vk'
-        WHEN utm_source LIKE lower('yandex%') THEN 'yandex'
+        WHEN utm_source LIKE LOWER('yandex%') THEN 'yandex'
         ELSE 'other'
     END AS utm_source,
-    sum(visitors_count) AS visitors
+    SUM(visitors_count) AS visitors
 FROM aggregate_last_paid_click
 GROUP BY
     visit_date, CASE
         WHEN utm_source LIKE ('vk%') THEN 'vk'
-        WHEN utm_source LIKE lower('yandex%') THEN 'yandex'
+        WHEN utm_source LIKE LOWER('yandex%') THEN 'yandex'
         ELSE 'other'
     END
 ORDER BY visitors DESC
@@ -126,15 +126,15 @@ ORDER BY visitors DESC
 SELECT
     CASE
         WHEN utm_source LIKE ('vk%') THEN 'vk'
-        WHEN utm_source LIKE lower('yandex%') THEN 'yandex'
+        WHEN utm_source LIKE LOWER('yandex%') THEN 'yandex'
         ELSE 'other'
     END AS source,
-    sum(visitors_count) AS visitors
+    SUM(visitors_count) AS visitors
 FROM aggregate_last_paid_click
 GROUP BY
     CASE
         WHEN utm_source LIKE ('vk%') THEN 'vk'
-        WHEN utm_source LIKE lower('yandex%') THEN 'yandex'
+        WHEN utm_source LIKE LOWER('yandex%') THEN 'yandex'
         ELSE 'other'
     END
 ORDER BY visitors DESC
@@ -142,15 +142,15 @@ ORDER BY visitors DESC
 SELECT
     CASE
         WHEN utm_source LIKE ('vk%') THEN 'vk'
-        WHEN utm_source LIKE lower('yandex%') THEN 'yandex'
+        WHEN utm_source LIKE LOWER('yandex%') THEN 'yandex'
         ELSE 'other'
     END AS source,
-    sum(leads_count) AS leads
+    SUM(leads_count) AS leads
 FROM aggregate_last_paid_click
 GROUP BY
     CASE
         WHEN utm_source LIKE ('vk%') THEN 'vk'
-        WHEN utm_source LIKE lower('yandex%') THEN 'yandex'
+        WHEN utm_source LIKE LOWER('yandex%') THEN 'yandex'
         ELSE 'other'
     END
 ORDER BY leads DESC
@@ -158,17 +158,17 @@ ORDER BY leads DESC
 SELECT
     CASE
         WHEN utm_source LIKE ('vk%') THEN 'vk'
-        WHEN utm_source LIKE lower('yandex%') THEN 'yandex'
+        WHEN utm_source LIKE LOWER('yandex%') THEN 'yandex'
         ELSE 'other'
     END AS source,
-    sum(visitors_count) AS visitors,
-    sum(leads_count) AS leads,
-    sum(purchases_count) AS purchases
+    SUM(visitors_count) AS visitors,
+    SUM(leads_count) AS leads,
+    SUM(purchases_count) AS purchases
 FROM aggregate_last_paid_click
 GROUP BY
     CASE
         WHEN utm_source LIKE ('vk%') THEN 'vk'
-        WHEN utm_source LIKE lower('yandex%') THEN 'yandex'
+        WHEN utm_source LIKE LOWER('yandex%') THEN 'yandex'
         ELSE 'other'
     END
 ORDER BY visitors DESC
@@ -176,36 +176,36 @@ ORDER BY visitors DESC
 SELECT
     CASE
         WHEN utm_source LIKE ('vk%') THEN 'vk'
-        WHEN utm_source LIKE lower('yandex%') THEN 'yandex'
+        WHEN utm_source LIKE LOWER('yandex%') THEN 'yandex'
         ELSE 'other'
     END AS sourse,
-    round(
-        sum(leads_count) * 100.00 / sum(visitors_count), 2
+    ROUND(
+        SUM(leads_count) * 100.00 / SUM(visitors_count), 2
     ) AS conv_click_to_lead,
-    round(
-        sum(purchases_count) * 100.0 / sum(leads_count), 2
+    ROUND(
+        SUM(purchases_count) * 100.0 / SUM(leads_count), 2
     ) AS conv_lead_to_purchase
 FROM aggregate_last_paid_click
 GROUP BY
     CASE
         WHEN utm_source LIKE ('vk%') THEN 'vk'
-        WHEN utm_source LIKE lower('yandex%') THEN 'yandex'
+        WHEN utm_source LIKE LOWER('yandex%') THEN 'yandex'
         ELSE 'other'
     END
 ORDER BY conv_click_to_lead DESC
 
 /* общие затраты на рекламу */
-select
+SELECT
     ya.utm_source,
-    sum(ya.daily_spent) as costs
-from ya_ads as ya
-group by 1
-union all
-select
+    SUM(ya.daily_spent) AS costs
+FROM ya_ads AS ya
+GROUP BY 1
+UNION ALL
+SELECT
     va.utm_source,
-    sum(va.daily_spent) as costs
-from vk_ads as va
-group by 1;
+    SUM(va.daily_spent) as costs
+FROM vk_ads AS va
+GROUP BY 1;
 /* окупаемость рекламных кампаний*/
 SELECT
     utm_campaign,
@@ -220,30 +220,30 @@ ORDER BY source DESC NULLS LAST
 /* итоговая таблица по агрегации source */
 SELECT
     utm_source AS source,
-    sum(visitors_count) AS visitors,
-    sum(leads_count) AS leads,
-    sum(purchases_count) AS purchases,
-    sum(total_cost) AS cost,
-    sum(revenue) AS revenue,
-    round(sum(total_cost) / sum(visitors_count), 2) AS cpu,
-    round(sum(total_cost) / sum(leads_count), 2) AS cpl,
-    round(sum(total_cost) / sum(purchases_count), 2) AS cppu,
-    round((sum(revenue) - sum(total_cost)) * 100.00 / sum(total_cost), 2) AS roi
+    SUM(visitors_count) AS visitors,
+    SUM(leads_count) AS leads,
+    SUM(purchases_count) AS purchases,
+    SUM(total_cost) AS cost,
+    SUM(revenue) AS revenue,
+    ROUND(SUM(total_cost) / SUM(visitors_count), 2) AS cpu,
+    ROUND(SUM(total_cost) / SUM(leads_count), 2) AS cpl,
+    ROUND(SUM(total_cost) / SUM(purchases_count), 2) AS cppu,
+    ROUND((SUM(revenue) - SUM(total_cost)) * 100.00 / SUM(total_cost), 2) AS roi
 FROM aggregate_last_paid_click
 GROUP BY utm_source
 ORDER BY roi DESC NULLS LAST
 /* итоговая таблица по агрегации medium */
 SELECT
     utm_medium AS medium,
-    sum(visitors_count) AS visitors,
-    sum(leads_count) AS leads,
-    sum(purchases_count) AS purchases,
-    sum(total_cost) AS cost,
-    sum(revenue) AS revenue,
-    round(sum(total_cost) / sum(visitors_count), 2) AS cpu,
-    round(sum(total_cost) / sum(leads_count), 2) AS cpl,
-    round(sum(total_cost) / sum(purchases_count), 2) AS cppu,
-    round((sum(revenue) - sum(total_cost)) * 100.00 / sum(total_cost), 2) AS roi
+    SUM(visitors_count) AS visitors,
+    SUM(leads_count) AS leads,
+    SUM(purchases_count) AS purchases,
+    SUM(total_cost) AS cost,
+    SUM(revenue) AS revenue,
+    ROUND(SUM(total_cost) / SUM(visitors_count), 2) AS cpu,
+    ROUND(SUM(total_cost) / SUM(leads_count), 2) AS cpl,
+    ROUND(SUM(total_cost) / SUM(purchases_count), 2) AS cppu,
+    ROUND((SUM(revenue) - SUM(total_cost)) * 100.00 / SUM(total_cost), 2) AS roi
 FROM aggregate_last_paid_click
 GROUP BY utm_medium
 ORDER BY roi DESC NULLS LAST;
