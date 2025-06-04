@@ -1,4 +1,4 @@
-/* Расчеты метрик произведены на основе таблицы aggregate_last_paid_click, 
+/* Расчеты метрик произведены на основе таблицы aggregate_last_paid_click,
 построенной по модели атрибуции Last Paid Click */
 WITH tab AS (
     SELECT
@@ -60,8 +60,8 @@ ads AS (
 ),
 
 aggregate_last_paid_click AS (
-  SELECT
-	t2.visit_date,
+    SELECT
+        t2.visit_date,
         t2.visitors_count,
         t2.utm_source,
         t2.utm_medium,
@@ -70,14 +70,16 @@ aggregate_last_paid_click AS (
         t2.leads_count,
         t2.purchases_count,
         t2.revenue
- FROM tab2 AS t2
- LEFT JOIN ads AS a
-	ON t2.visit_date = a.campaign_date
-        AND t2.utm_source = a.utm_source
-        AND t2.utm_medium = a.utm_medium
-        AND t2.utm_campaign = a.utm_campaign
-ORDER BY 9 DESC NULLS LAST, 1 ASC, 5 DESC, 2, 3, 4
+    FROM tab2 AS t2
+    LEFT JOIN ads AS a
+        ON 
+            t2.visit_date = a.campaign_date
+            AND t2.utm_source = a.utm_source
+            AND t2.utm_medium = a.utm_medium
+            AND t2.utm_campaign = a.utm_campaign
+    ORDER BY 9 DESC NULLS LAST, 1 ASC, 5 DESC, 2, 3, 4
 )
+
 /* количество посетителей, лидов, покупателей */
 SELECT
     sum(visitors_count) AS visitors,
