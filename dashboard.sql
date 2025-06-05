@@ -121,22 +121,22 @@ GROUP BY 1, 2
 ORDER BY 3 DESC
 /* источники трафика: распределение трафика по каналам */
 SELECT
-    CASE
+    (CASE
         WHEN utm_source LIKE 'vk%' THEN 'vk'
         WHEN utm_source LIKE 'yandex%' THEN 'yandex'
         ELSE 'other'
-    END AS utm_source,
+    END) AS utm_source,
     SUM(visitors_count) AS visitors
 FROM aggregate_last_paid_click
 GROUP BY 1
 ORDER BY 2 DESC
 /* количество лидов по каналам */
 SELECT
-    CASE
+    (CASE
         WHEN utm_source LIKE 'vk%' THEN 'vk'
         WHEN utm_source LIKE 'yandex%' THEN 'yandex'
         ELSE 'other'
-    END AS source,
+    END) AS source,
     SUM(leads_count) AS leads
 FROM aggregate_last_paid_click
 GROUP BY 1
