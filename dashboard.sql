@@ -140,7 +140,7 @@ SELECT
 FROM aggregate_last_paid_click
 GROUP BY 1
 ORDER BY 2 DESC;
-/* количество посетителей, лидов, покупателей по каналам 
+/* количество посетителей, лидов, покупателей по каналам
 (воронка: клик --> лид --> оплата) */
 SELECT
     CASE
@@ -175,7 +175,7 @@ SELECT
     ya.utm_source,
     SUM(ya.daily_spent) AS total_costs
 FROM ya_ads AS ya
-GROUP BY 1;
+GROUP BY 1
 UNION ALL
 SELECT
     va.utm_source,
