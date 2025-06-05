@@ -21,7 +21,7 @@ SELECT
 FROM tab AS t
 INNER JOIN sessions AS s
     ON t.last_date = s.visit_date AND t.visitor_id = s.visitor_id
-LEFT JOIN leads AS l 
+LEFT JOIN leads AS l
     ON s.visitor_id = l.visitor_id
 WHERE s.medium != 'organic'
 ORDER BY 8 DESC NULLS LAST, 2, 3, 4, 5;
