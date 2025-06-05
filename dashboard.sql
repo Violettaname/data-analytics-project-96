@@ -79,14 +79,12 @@ aggregate_last_paid_click AS (
             AND t2.utm_campaign = a.utm_campaign
     ORDER BY 9 DESC NULLS LAST, 1 ASC, 5 DESC, 2, 3, 4
 )
-
 /* количество посетителей, лидов, покупателей */
 SELECT
     SUM(visitors_count) AS visitors,
     SUM(leads_count) AS leads,
     SUM(purchases_count) AS purchases
 FROM aggregate_last_paid_click;
-
 /* конверсия из клика в лид, из лида в оплату */
 SELECT
     ROUND(
@@ -125,7 +123,7 @@ SELECT
         WHEN utm_source LIKE 'vk%' THEN 'vk'
         WHEN utm_source LIKE 'yandex%' THEN 'yandex'
         ELSE 'other'
-    END) AS utm_source,
+    END) AS source,
     SUM(visitors_count) AS visitors
 FROM aggregate_last_paid_click
 GROUP BY 1
@@ -180,7 +178,6 @@ GROUP BY
         ELSE 'other'
     END
 ORDER BY conv_click_to_lead DESC
-
 /* общие затраты на рекламу */
 SELECT
     ya.utm_source,
