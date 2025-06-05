@@ -122,8 +122,8 @@ ORDER BY 3 DESC
 /* источники трафика: распределение трафика по каналам */
 SELECT
     CASE
-        WHEN utm_source LIKE ('vk%') THEN 'vk'
-        WHEN utm_source LIKE LOWER('yandex%') THEN 'yandex'
+        WHEN utm_source LIKE 'vk%' THEN 'vk'
+        WHEN utm_source LIKE 'yandex%' THEN 'yandex'
         ELSE 'other'
     END AS utm_source,
     SUM(visitors_count) AS visitors
@@ -133,8 +133,8 @@ ORDER BY 2 DESC
 /* количество лидов по каналам */
 SELECT
     CASE
-        WHEN utm_source LIKE ('vk%') THEN 'vk'
-        WHEN utm_source LIKE LOWER('yandex%') THEN 'yandex'
+        WHEN utm_source LIKE 'vk%' THEN 'vk'
+        WHEN utm_source LIKE 'yandex%' THEN 'yandex'
         ELSE 'other'
     END AS source,
     SUM(leads_count) AS leads
