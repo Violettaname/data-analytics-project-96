@@ -117,7 +117,7 @@ SELECT
     SUM(visitors_count) AS visitors
 FROM aggregate_last_paid_click
 GROUP BY 1, 2
-ORDER BY 3 DESC
+ORDER BY 3 DESC;
 /* источники трафика: распределение трафика по каналам */
 SELECT
     (CASE
@@ -192,7 +192,7 @@ SELECT
 FROM aggregate_last_paid_click
 WHERE utm_source IN ('yandex', 'vk')
 GROUP BY 1, 2
-ORDER BY 3 DESC NULLS LAST
+ORDER BY 3 DESC NULLS LAST;
 /* итоговая таблица по агрегации source */
 SELECT
     utm_source AS source,
@@ -207,7 +207,7 @@ SELECT
     ROUND((SUM(revenue) - SUM(total_cost)) * 100.00 / SUM(total_cost), 2) AS roi
 FROM aggregate_last_paid_click
 GROUP BY utm_source
-ORDER BY roi DESC NULLS LAST
+ORDER BY roi DESC NULLS LAST;
 /* итоговая таблица по агрегации medium */
 SELECT
     utm_medium AS medium,
