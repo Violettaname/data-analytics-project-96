@@ -199,30 +199,30 @@ SELECT
     SUM(visitors_count) AS visitors,
     SUM(leads_count) AS leads,
     SUM(purchases_count) AS purchases,
-    SUM(total_cost) AS cost,
+    SUM(total_cost) AS total_cost,
     SUM(revenue) AS revenue,
     ROUND(SUM(total_cost) / SUM(visitors_count), 2) AS cpu,
     ROUND(SUM(total_cost) / SUM(leads_count), 2) AS cpl,
     ROUND(SUM(total_cost) / SUM(purchases_count), 2) AS cppu,
     ROUND((SUM(revenue) - SUM(total_cost)) * 100.00 / SUM(total_cost), 2) AS roi
 FROM aggregate_last_paid_click
-GROUP BY utm_source
-ORDER BY roi DESC NULLS LAST;
+GROUP BY 1
+ORDER BY 10 DESC NULLS LAST;
 /* итоговая таблица по агрегации medium */
 SELECT
     utm_medium AS medium,
     SUM(visitors_count) AS visitors,
     SUM(leads_count) AS leads,
     SUM(purchases_count) AS purchases,
-    SUM(total_cost) AS cost,
+    SUM(total_cost) AS total_cost,
     SUM(revenue) AS revenue,
     ROUND(SUM(total_cost) / SUM(visitors_count), 2) AS cpu,
     ROUND(SUM(total_cost) / SUM(leads_count), 2) AS cpl,
     ROUND(SUM(total_cost) / SUM(purchases_count), 2) AS cppu,
     ROUND((SUM(revenue) - SUM(total_cost)) * 100.00 / SUM(total_cost), 2) AS roi
 FROM aggregate_last_paid_click
-GROUP BY utm_medium
-ORDER BY roi DESC NULLS LAST;
+GROUP BY 1
+ORDER BY 10 DESC NULLS LAST;
 /* время закрытия лидов */
 WITH tab AS (
     SELECT
