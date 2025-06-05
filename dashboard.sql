@@ -105,7 +105,7 @@ SELECT
     ROUND(SUM(total_cost) / SOM(purchases_count), 2) AS cppu,
     ROUND(
         (SUM(revenue) - SUM(total_cost)) * 100.0 / (SUM(total_cost)
-    ), 2) AS roi
+        ), 2) AS roi
 FROM aggregate_last_paid_click;
 /* динамика посещений */
 SELECT
@@ -117,7 +117,7 @@ SELECT
     END AS utm_source,
     SUM(visitors_count) AS visitors
 FROM aggregate_last_paid_click
-GROUP BY 1, 2
+GROUP BY visit_date, utm_source
 ORDER BY visitors DESC
 /* источники трафика: распределение трафика по каналам */
 SELECT
@@ -125,10 +125,10 @@ SELECT
         WHEN utm_source LIKE ('vk%') THEN 'vk'
         WHEN utm_source LIKE LOWER('yandex%') THEN 'yandex'
         ELSE 'other'
-    END AS source,
+    END AS utm_source,
     SUM(visitors_count) AS visitors
 FROM aggregate_last_paid_click
-GROUP BY 1, 2
+GROUP BY visit_date, utm_source
 ORDER BY visitors DESC
 /* количество лидов по каналам */
 SELECT
@@ -189,13 +189,13 @@ ORDER BY conv_click_to_lead DESC
 /* общие затраты на рекламу */
 SELECT
     ya.utm_source,
-    SUM(ya.daily_spent) AS costs
+    SUM(ya.daily_spent) AS total_costs
 FROM ya_ads AS ya
 GROUP BY 1
 UNION ALL
 SELECT
     va.utm_source,
-    SUM(va.daily_spent) as costs
+    SUM(va.daily_spent) AS total_costs
 FROM vk_ads AS va
 GROUP BY 1;
 /* окупаемость рекламных кампаний*/
