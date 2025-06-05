@@ -79,6 +79,7 @@ aggregate_last_paid_click AS (
             AND t2.utm_campaign = a.utm_campaign
     ORDER BY 9 DESC NULLS LAST, 1 ASC, 5 DESC, 2, 3, 4
 )
+
 /* количество посетителей, лидов, покупателей */
 SELECT
     SUM(visitors_count) AS visitors,
