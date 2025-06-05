@@ -117,13 +117,8 @@ SELECT
     END AS utm_source,
     SUM(visitors_count) AS visitors
 FROM aggregate_last_paid_click
-GROUP BY visit_date, 
-    CASE
-        WHEN utm_source LIKE ('vk%') THEN 'vk'
-        WHEN utm_source LIKE LOWER('yandex%') THEN 'yandex'
-        ELSE 'other'
-    END
-ORDER BY visitors DESC
+GROUP BY 1, 2
+ORDER BY 3 DESC
 /* источники трафика: распределение трафика по каналам */
 SELECT
     CASE
@@ -133,13 +128,8 @@ SELECT
     END AS utm_source,
     SUM(visitors_count) AS visitors
 FROM aggregate_last_paid_click
-GROUP BY
-    CASE
-        WHEN utm_source LIKE ('vk%') THEN 'vk'
-        WHEN utm_source LIKE LOWER('yandex%') THEN 'yandex'
-        ELSE 'other'
-    END
-ORDER BY visitors DESC
+GROUP BY 1
+ORDER BY 2 DESC
 /* количество лидов по каналам */
 SELECT
     CASE
@@ -149,13 +139,8 @@ SELECT
     END AS source,
     SUM(leads_count) AS leads
 FROM aggregate_last_paid_click
-GROUP BY
-    CASE
-        WHEN utm_source LIKE ('vk%') THEN 'vk'
-        WHEN utm_source LIKE LOWER('yandex%') THEN 'yandex'
-        ELSE 'other'
-    END
-ORDER BY leads DESC
+GROUP BY 1
+ORDER BY 2 DESC
 /* количество посетителей, лидов, покупателей по каналам (воронка: клик --> лид --> оплата) */
 SELECT
     CASE
