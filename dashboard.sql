@@ -191,8 +191,8 @@ SELECT
     ) AS source
 FROM aggregate_last_paid_click
 WHERE utm_source IN ('yandex', 'vk')
-GROUP BY utm_campaign, utm_source
-ORDER BY source DESC NULLS LAST
+GROUP BY 1, 2
+ORDER BY 3 DESC NULLS LAST
 /* итоговая таблица по агрегации source */
 SELECT
     utm_source AS source,
@@ -247,7 +247,7 @@ tab2 AS (
 tab3 AS (
     SELECT
         (conversion_date - click_date) AS days_to_close,
-        COUNT(lead_id)
+        COUNT(lead_id) AS count_leds
     FROM tab2
     GROUP BY 1
     ORDER BY 1
