@@ -104,8 +104,8 @@ SELECT
     ROUND(SUM(total_cost) / SUM(leads_count), 2) AS cpl,
     ROUND(SUM(total_cost) / SOM(purchases_count), 2) AS cppu,
     ROUND(
-        (SUM(revenue) - SUM(total_cost)) * 100.0 / (SUM(total_cost)
-        ), 2) AS roi
+        (SUM(revenue) - SUM(total_cost)) * 100.0 / (SUM(total_cost)), 2
+    ) AS roi
 FROM aggregate_last_paid_click;
 /* динамика посещений */
 SELECT
@@ -117,7 +117,12 @@ SELECT
     END AS utm_source,
     SUM(visitors_count) AS visitors
 FROM aggregate_last_paid_click
-GROUP BY visit_date, utm_source
+GROUP BY visit_date, 
+    CASE
+        WHEN utm_source LIKE ('vk%') THEN 'vk'
+        WHEN utm_source LIKE LOWER('yandex%') THEN 'yandex'
+        ELSE 'other'
+    END
 ORDER BY visitors DESC
 /* источники трафика: распределение трафика по каналам */
 SELECT
@@ -128,7 +133,12 @@ SELECT
     END AS utm_source,
     SUM(visitors_count) AS visitors
 FROM aggregate_last_paid_click
-GROUP BY visit_date, utm_source
+GROUP BY
+    CASE
+        WHEN utm_source LIKE ('vk%') THEN 'vk'
+        WHEN utm_source LIKE LOWER('yandex%') THEN 'yandex'
+        ELSE 'other'
+    END
 ORDER BY visitors DESC
 /* количество лидов по каналам */
 SELECT
