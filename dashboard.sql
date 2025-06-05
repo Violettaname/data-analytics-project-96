@@ -140,7 +140,8 @@ SELECT
 FROM aggregate_last_paid_click
 GROUP BY 1
 ORDER BY 2 DESC;
-/* количество посетителей, лидов, покупателей по каналам (воронка: клик --> лид --> оплата) */
+/* количество посетителей, лидов, покупателей по каналам 
+(воронка: клик --> лид --> оплата) */
 SELECT
     CASE
         WHEN utm_source LIKE ('vk%') THEN 'vk'
@@ -151,13 +152,8 @@ SELECT
     SUM(leads_count) AS leads,
     SUM(purchases_count) AS purchases
 FROM aggregate_last_paid_click
-GROUP BY
-    CASE
-        WHEN utm_source LIKE ('vk%') THEN 'vk'
-        WHEN utm_source LIKE LOWER('yandex%') THEN 'yandex'
-        ELSE 'other'
-    END
-ORDER BY visitors DESC;
+GROUP BY 1
+ORDER BY 2 DESC;
 /* Конверсии по каналам, % */
 SELECT
     CASE
@@ -172,13 +168,8 @@ SELECT
         SUM(purchases_count) * 100.0 / SUM(leads_count), 2
     ) AS conv_lead_to_purchase
 FROM aggregate_last_paid_click
-GROUP BY
-    CASE
-        WHEN utm_source LIKE ('vk%') THEN 'vk'
-        WHEN utm_source LIKE LOWER('yandex%') THEN 'yandex'
-        ELSE 'other'
-    END
-ORDER BY conv_click_to_lead DESC;
+GROUP BY 1
+ORDER BY 2 DESC;
 /* общие затраты на рекламу */
 SELECT
     ya.utm_source,
