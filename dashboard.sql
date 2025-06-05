@@ -128,7 +128,7 @@ SELECT
     SUM(visitors_count) AS visitors
 FROM aggregate_last_paid_click
 GROUP BY 1
-ORDER BY 2 DESC
+ORDER BY 2 DESC;
 /* количество лидов по каналам */
 SELECT
     (CASE
@@ -139,7 +139,7 @@ SELECT
     SUM(leads_count) AS leads
 FROM aggregate_last_paid_click
 GROUP BY 1
-ORDER BY 2 DESC
+ORDER BY 2 DESC;
 /* количество посетителей, лидов, покупателей по каналам (воронка: клик --> лид --> оплата) */
 SELECT
     CASE
@@ -157,7 +157,7 @@ GROUP BY
         WHEN utm_source LIKE LOWER('yandex%') THEN 'yandex'
         ELSE 'other'
     END
-ORDER BY visitors DESC
+ORDER BY visitors DESC;
 /* Конверсии по каналам, % */
 SELECT
     CASE
@@ -178,13 +178,13 @@ GROUP BY
         WHEN utm_source LIKE LOWER('yandex%') THEN 'yandex'
         ELSE 'other'
     END
-ORDER BY conv_click_to_lead DESC
+ORDER BY conv_click_to_lead DESC;
 /* общие затраты на рекламу */
 SELECT
     ya.utm_source,
     SUM(ya.daily_spent) AS total_costs
 FROM ya_ads AS ya
-GROUP BY 1
+GROUP BY 1;
 UNION ALL
 SELECT
     va.utm_source,
